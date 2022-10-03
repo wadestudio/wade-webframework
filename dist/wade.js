@@ -64,16 +64,21 @@
                     <iframe
                         src="${path}"
                         ${props}
+                        style="border: none; display: none;"
                         onload="
                             let component = this.contentDocument.body.innerHTML;
-    
-                            component.match(/\{\{([^}]+)\}\}/g).forEach(el => {
-                                let match = el.slice(2, -2);
-        
-                                component = component.replace(el, this.getAttribute(match.trim()));
-                            });
+                            if(component.match(/\{\{([^}]+)\}\}/g)){
+                                component.match(/\{\{([^}]+)\}\}/g).forEach(el => {
+                                    let match = el.slice(2, -2);
+            
+                                    component = component.replace(el, this.getAttribute(match.trim()));
+                                });
+                            }
         
                             this.contentDocument.body.innerHTML = component;
+                            this.contentDocument.querySelectorAll('script').forEach((el)=>{
+                                el.remove();
+                            });
                             this.before((this.contentDocument.body||this.contentDocument).children[0]);
                             this.remove();
                         ">
@@ -102,7 +107,13 @@
     
     customElements.define('wade-app', class extends HTMLElement {
         connectedCallback() {
-            this.outerHTML = this.innerHTML;
+            let lang = navigator.language || navigator.userLanguage;
+            if (lang.match(this.getAttribute('lang'))) {
+                document.querySelector('html').lang = lang;
+                this.outerHTML = this.innerHTML;
+            }else{
+                this.outerHTML = "";
+            }
         };
     });
 
@@ -120,4 +131,40 @@
 
         };
     });
+
+    // Routes
+    customElements.define('wade-routes', class extends HTMLElement {
+        connectedCallback() {
+            this.outerHTML = `<div class="wade-routes">${this.innerHTML}</div>`;
+        };
+    });
+
+    customElements.define('wade-route', class extends HTMLElement {
+        connectedCallback() {
+            let path = window.location.pathname;
+
+            if(path == this.getAttribute('path')){
+                this.outerHTML = this.innerHTML;
+            }else{
+                this.outerHTML = "";
+            }
+
+            document.querySelectorAll(`.wade-router[href^="/"]`).forEach(el => 
+                el.addEventListener("click", evt => {
+                    evt.preventDefault();
+                    const {pathname: path} = new URL(evt.target.href);
+                    window.history.pushState({path}, path, path);
+                    document.querySelector('.wade-routes').innerHTML = this.innerHTML;
+                })
+            );
+
+        };
+    });
+
+    customElements.define('wade-link', class extends HTMLElement {
+        connectedCallback() {
+            this.outerHTML = `<a class="wade-router" href="${this.getAttribute('href')}">${this.innerHTML}</a>`;
+        };
+    });
+
 })();
