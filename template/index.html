@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Test</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+    <wade-head>
+        <!-- UI -->
+        <wade-import name="app-navs" src="./components/toolbar.html"></wade-import>
+        <!-- 언어 -->
+        <wade-import name="app-ko-home" src="./lang/ko-home.html"></wade-import>
+        <wade-import name="app-en-home" src="./lang/en-home.html"></wade-import>
+    </wade-head>
+
+    <wade-app lang="ko">
+        
+        <wade-routes>
+            <wade-route path="/">
+                <h1>홈임</h1>
+                <wade-link href="/">home</wade-link>
+                <wade-link href="/test">test</wade-link>
+            </wade-route>
+
+            <wade-route path="/test">
+                <h1>아무고토 없음</h1>
+                <wade-link href="/">home</wade-link>
+                <wade-link href="/test">test</wade-link>
+            </wade-route>
+        </wade-routes>
+
+    </wade-app>
+
+    <wade-app lang="en">
+        <h1>영어 지원 안함 ㅅㄱ</h1>
+    </wade-app>
+
+    <script src="./wade.js"></script>
+</body>
+</html>
