@@ -1,6 +1,24 @@
 (()=>{
     /**
      * 
+     * @param {*} element 
+     * @param {*} props 
+     * @param {*} innerHTML 
+     * @returns 
+     */
+    const createElement = (element, props,innerHTML="") => {
+        if(props == null || undefined){
+        return `<${element}>${innerHTML}</${element}>`
+        }else{
+        let Attribute = "";
+        Object.keys(props).forEach((element) => {
+            Attribute += `${element}="${props[element]}"`
+        });
+        return `<${element} ${Attribute}>${innerHTML}</${element}>`
+        };
+    };
+    /**
+     * 
      * @param {*} template template to bind
      * @param {*} data data to put in the template
      * @param {*} attribute Variables to be used in templates
@@ -163,7 +181,20 @@
 
     customElements.define('wade-link', class extends HTMLElement {
         connectedCallback() {
-            this.outerHTML = `<a class="wade-router" href="${this.getAttribute('href')}">${this.innerHTML}</a>`;
+            let props = {
+                class : "wade-router",
+                href : this.getAttribute('href')
+            };
+            this.getAttributeNames().forEach((attr)=>{
+                if(!attr.match(/href/g)){
+                    if(props[attr]){
+                        props[attr] += ` ${this.getAttribute(attr)}`;
+                    }else{
+                        props[attr] = `${this.getAttribute(attr)}`;
+                    };
+                }
+            });
+            this.outerHTML = createElement('a',props,this.innerHTML);
         };
     });
 
