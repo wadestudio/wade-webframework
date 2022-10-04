@@ -78,6 +78,7 @@
                     this.getAttributeNames().forEach(prop => {
                         props += ` ${prop}="${this.getAttribute(prop)}"`;
                     });
+            
                     let component = `
                     <iframe
                         src="${path}"
@@ -85,13 +86,19 @@
                         style="border: none; display: none;"
                         onload="
                             let component = this.contentDocument.body.innerHTML;
+
+                            if(component.match(/\^\\\#\\\! stylesComponent/g)){
+                                let cont = document.createAttribute('contents');
+                                cont.value = this.innerHTML;
+                                this.setAttributeNode(cont);
+                            };
+
                             if(component.match(/\{\{([^}]+)\}\}/g)){
                                 component.match(/\{\{([^}]+)\}\}/g).forEach(el => {
                                     let match = el.slice(2, -2);
-            
                                     component = component.replace(el, this.getAttribute(match.trim()));
                                 });
-                            }
+                            };
         
                             this.contentDocument.body.innerHTML = component;
                             this.contentDocument.querySelectorAll('script').forEach((el)=>{
@@ -100,6 +107,7 @@
                             this.before((this.contentDocument.body||this.contentDocument).children[0]);
                             this.remove();
                         ">
+                        ${this.innerHTML}
                     </iframe>
                     `;
         
