@@ -65,69 +65,16 @@
         return template;
     };
 
-    const createComponent = (name, path) => {
-        if(!name.match(/\-/g)){
-            console.error(`WADE Framework Error : An error occurred because the specified name "${name}" does not contain a '-'.`);
-        }else{
-            if(name.match(/wade|dom/g)){
-                console.error(`WADE Framework Error : The name you specify "${name}" can be used as a reserved word and cause errors in the DOM element. (Reserved word : wade | dom)`);
-            };
-            customElements.define(`${name}`, class extends HTMLElement {
-                connectedCallback() {
-                    let props = ``;
-                    this.getAttributeNames().forEach(prop => {
-                        props += ` ${prop}="${this.getAttribute(prop)}"`;
-                    });
-            
-                    let component = `
-                    <iframe
-                        src="${path}"
-                        ${props}
-                        style="border: none; display: none;"
-                        onload="
-                            let component = this.contentDocument.body.innerHTML;
-
-                            if(component.match(/\^\\\#\\\! stylesComponent/g)){
-                                let cont = document.createAttribute('contents');
-                                cont.value = this.innerHTML;
-                                this.setAttributeNode(cont);
-                            };
-
-                            if(component.match(/\{\{([^}]+)\}\}/g)){
-                                component.match(/\{\{([^}]+)\}\}/g).forEach(el => {
-                                    let match = el.slice(2, -2);
-                                    component = component.replace(el, this.getAttribute(match.trim()));
-                                });
-                            };
-        
-                            this.contentDocument.body.innerHTML = component;
-                            this.contentDocument.querySelectorAll('script').forEach((el)=>{
-                                el.remove();
-                            });
-                            this.before((this.contentDocument.body||this.contentDocument).children[0]);
-                            this.remove();
-                        ">
-                        ${this.innerHTML}
-                    </iframe>
-                    `;
-        
-                    this.outerHTML = component;
-                };
-            });
-        }
-    };
-    
     customElements.define('wade-import', class extends HTMLElement {
         connectedCallback() {
-            this.outerHTML = "";
-            createComponent(this.getAttribute('name'), this.getAttribute('src')) 
-    
+            this.outerHTML = `<iframe style="display:none;" src="${this.getAttribute('src')}"
+            onload="wade.createComponent(this);this.remove();"></iframe>`;
         };
     });
     
     customElements.define('wade-head', class extends HTMLElement {
         connectedCallback() {
-            this.outerHTML = "";
+            this.outerHTML = this.innerHTML;
         };
     });
     
@@ -206,4 +153,19 @@
         };
     });
 
+    return wade = {
+        createComponent(component){
+            component.contentDocument.querySelectorAll('template').forEach((e)=>{
+                customElements.define(e.getAttribute('name'), class extends HTMLElement {
+                    connectedCallback() {
+                        this.outerHTML = createElement('div',{id:'app',class:e.getAttribute('name')});
+                    };
+                });
+                document.querySelectorAll(`div#app.${e.getAttribute('name')}`).forEach((sR)=>{
+                    sR.attachShadow({mode:'open'});
+                    sR.shadowRoot.innerHTML = e.innerHTML;
+                });
+            });
+        }
+    }
 })();
