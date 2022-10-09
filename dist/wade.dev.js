@@ -51,8 +51,10 @@
                 el.addEventListener("click", evt => {
                     evt.preventDefault();
                     const {pathname: path} = new URL(evt.target.href);
-                    window.history.pushState({path}, path, path);
-                    document.querySelector('.wade-routes').innerHTML = this.innerHTML;
+                    setTimeout(() => {
+                        window.history.pushState({path}, path, path);
+                        document.querySelector('.wade-routes').innerHTML = this.innerHTML;
+                    }, 450);
                 })
             );
 
